@@ -58,5 +58,59 @@ const getTransactions = async (req, res, next) => {
     next(err);
   }
 };
+const getSystemStats = async (req, res, next) => {
+  try {
+    const totalUsers = await User.count();
+    const totalBalance = await Account.sum("balance");
+    const totalTransfers = await Transaction.count({
+      where: { type: "Transfer" },
+    });
+    const totalWithdrawals = await Transaction.count({
+      where: { type: "Withdrawal" },
+    });
 
-module.exports = { createUser, getBalance, getTransactions };
+    res.json({
+      totalUsers,
+      totalValueInWallets: totalBalance || 0,
+      totalTransfers,
+      totalWithdrawals,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const getAllTransactions = async (req, res, next) => {
+  try {
+    const transactions = await Transaction.findAll({
+      include: [
+        { model: Account, as: "fromAccount", include: User },
+        { model: Account, as: "toAccount", include: User },
+      ],
+      order: [["createdAt", "DESC"]],
+    });
+
+    const formatted = transactions.map(tx => ({
+      id: tx.id,
+      type: tx.type,
+      status: tx.status,
+      amount: tx.amount,
+      fromUser: tx.fromAccount ? tx.fromAccount.User.name : null,
+      toUser: tx.toAccount ? tx.toAccount.User.name : null,
+      timestamp: tx.createdAt,
+    }));
+
+    res.json(formatted);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Export them too
+module.exports = {
+  createUser,
+  getBalance,
+  getTransactions,
+  getSystemStats,
+  getAllTransactions,
+};

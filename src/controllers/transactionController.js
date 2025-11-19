@@ -33,7 +33,7 @@ const deposit = async (req, res, next) => {
       });
       if (!account) throw new Error("Account not found");
 
-      account.balance += amount;
+      account.balance = (parseFloat(account.balance) + amount).toFixed(2);
       await account.save({ transaction: t });
 
       const tx = await Transaction.create(
@@ -92,9 +92,10 @@ const transfer = async (req, res, next) => {
       if (!fromAccount || !toAccount) throw new Error("Account not found");
       if (fromAccount.balance < amount) throw new Error("Insufficient balance");
 
-      fromAccount.balance -= amount;
-      toAccount.balance += amount;
-
+      fromAccount.balance = (parseFloat(fromAccount.balance) - amount).toFixed(
+        2
+      );
+      toAccount.balance = (parseFloat(toAccount.balance) + amount).toFixed(2);
       await fromAccount.save({ transaction: t });
       await toAccount.save({ transaction: t });
 
@@ -149,7 +150,7 @@ const withdraw = async (req, res, next) => {
       if (!account) throw new Error("Account not found");
       if (account.balance < amount) throw new Error("Insufficient balance");
 
-      account.balance -= amount;
+      account.balance = (parseFloat(account.balance) - amount).toFixed(2);
       await account.save({ transaction: t });
 
       // Simulate external system call (e.g., bank API) - assume success for prototype
