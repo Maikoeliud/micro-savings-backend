@@ -26,7 +26,22 @@ const createUser = async (req, res, next) => {
     next(err);
   }
 };
-
+const getAllUsers = async (req, res, next) => {
+  try {
+    const users = await User.findAll({
+      include: [
+        {
+          model: Account,
+          attributes: ["id", "balance"], // Only include relevant account fields
+        },
+      ],
+      attributes: ["id", "name", "email"], // User fields to return
+    });
+    res.json(users);
+  } catch (err) {
+    next(err);
+  }
+};
 const getBalance = async (req, res, next) => {
   try {
     const user = await User.findByPk(req.params.user_id, { include: Account });
@@ -109,6 +124,7 @@ const getAllTransactions = async (req, res, next) => {
 // Export them too
 module.exports = {
   createUser,
+  getAllUsers,
   getBalance,
   getTransactions,
   getSystemStats,
