@@ -10,7 +10,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://micro-savings-frontend.vercel.app/",
+      "https://micro-savings-frontend.vercel.app",
     ], // Allow requests from this origin (adjust if your frontend port changes)
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"], // Allowed HTTP methods
